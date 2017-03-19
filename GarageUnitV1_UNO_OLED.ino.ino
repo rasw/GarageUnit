@@ -1,10 +1,10 @@
-// ***************************************************************************
+// **************************************************************************
 // i2c wiring
 // Vin = +3.3V
 // GND = Gnd
 // SCK = SCL last i/o pin
 // SDI = SDA second in from last i/o pin
-// ***************************************************************************
+// **************************************************************************
 
 #include <Wire.h>
 #include <SPI.h>
@@ -208,7 +208,7 @@ const unsigned char Temperature [] PROGMEM = {
 // End graphics
 
 int fontSize = 1;
-int LightSensorPin = A5;
+int LightSensorPin = A0;
 float LightSensor = 0;
 float temperature = 0;
 float pressure = 0;
@@ -226,17 +226,15 @@ int  PowerUpMessagesCount = 0;           // Sends 30 messages every 10 seconds, 
 bool PostPowerUp = false;
 byte TransmitStatus[] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 byte success = false;                   // true = success
-int  x = 0;                              // arrary index
-int XbeeSkip = false;                  // if true then skip send to xbee
+int  x = 0;                             // arrary index
+int  XbeeSkip = 0;                       // if true then skip send to xbee
     
-
 Adafruit_BME280 bme;                     // I2C
 //Adafruit_BME280 bme(BME_CS);           // hardware SPI
 //Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO,  BME_SCK);
 
 
 void setup() {
- // Serial1.begin(9600);
   Serial.begin(9600);
   pinMode(BLUELED, OUTPUT);  
   pinMode(GREENLED, OUTPUT); 
@@ -245,7 +243,7 @@ void setup() {
 
   if (!bme.begin()) {
     Serial.println("Could not find BME280 sensor!");
-    while (1) {FlashErrorREDLED();}
+    while (1) {FlashErrorREDLED();} // 3 flashes , wait, 3 flashes etc
   }
    LampTest();
    digitalWrite(LED_BUILTIN, LOW); 
@@ -393,7 +391,7 @@ void DisplayLightData()
    display.setCursor(0,0);  
    display.print("Lights:" );
 
-   if(GetLightReading() > 10)
+   if(GetLightReading() > 50)
    {
       display.print("ON");
    }
@@ -524,12 +522,12 @@ int GetLightReading()
 {
    LightSensor = analogRead(LightSensorPin);
     
-    if(LightSensor < 551)
-       LightSensor = 551;
-    else if (LightSensor > 750)
-       LightSensor = 750;
+    if(LightSensor < 1)
+       LightSensor = 0;
+    else if (LightSensor > 70)
+       LightSensor = 70;         // garage lights ON reading
     
-    return map(LightSensor, 551, 750, 0, 100);
+    return map(LightSensor, 0, 70, 0, 100);
 }
 
 void LampTest()
